@@ -2,26 +2,30 @@ FROM ubuntu:16.04
 MAINTAINER Jake Mitchell <jmitchell@member.fsf.org>
 ENV USER root
 ENV HOME /root
-ENV RUST_VERSION 1.12.0
-ENV RUST_SRC_PATH /usr/local/src/rustc-${RUST_VERSION}/src
+ENV RUST_VERSION 1.31.1
+ENV RUST_SRC_PATH /usr/local/src/rustc-${RUST_VERSION}-src/src
 
+RUN apt-get update
+RUN apt-get install software-properties-common -y
+RUN add-apt-repository ppa:kelleyk/emacs
 RUN apt-get update
 RUN apt-get install -y curl \
                        file \
                        git \
-                       emacs \
+                       emacs25 \
                        gcc \
                        g++
 
 # Install Rust (stable) and Cargo
-RUN curl -sSf https://static.rust-lang.org/rustup.sh -o /tmp/rustup.sh
-RUN sh /tmp/rustup.sh --revision=${RUST_VERSION} --disable-sudo -y
+RUN curl https://sh.rustup.rs -sSf -o /tmp/rustup.sh
+RUN /bin/bash /tmp/rustup.sh -y
+
 RUN echo "export PATH=$HOME/.cargo/bin:$PATH" >> ${HOME}/.bashrc
 
 # Download corresponding Rust source
 WORKDIR /usr/local/src
 RUN curl -sSf https://static.rust-lang.org/dist/rustc-${RUST_VERSION}-src.tar.gz -o rust-src.tar.gz
-RUN tar xzf rust-src.tar.gz
+RUN tar xzf rust-src.tar.gz && ls
 RUN bash -c "if [[ ! -d $RUST_SRC_PATH ]]; then \
                echo '$RUST_SRC_PATH missing!'; \
                false; \
@@ -29,10 +33,13 @@ RUN bash -c "if [[ ! -d $RUST_SRC_PATH ]]; then \
 WORKDIR ${HOME}
 
 # Install Racer for Rust autocompletion
-RUN cargo install racer
+ENV CARGO_PATH=$HOME/.cargo/bin/
+# Racer requires rust nightly
+RUN $CARGO_PATH/rustup override set nightly
+RUN $CARGO_PATH/cargo install racer
 
 # Install rustfmt to reformat Rust code
-RUN cargo install rustfmt
+RUN $CARGO_PATH/cargo install rustfmt --force
 
 # Install emacs configuration
 COPY emacs.d ${HOME}/.emacs.d
