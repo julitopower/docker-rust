@@ -1,5 +1,5 @@
 FROM ubuntu:16.04
-MAINTAINER Jake Mitchell <jmitchell@member.fsf.org>
+MAINTAINER Julio Delgado <julio.delgadomangas@gmail.com>
 ENV USER root
 ENV HOME /root
 ENV RUST_VERSION 1.31.1
