@@ -1,18 +1,18 @@
-FROM ubuntu:16.04
+FROM ubuntu:20.10
 MAINTAINER Julio Delgado <julio.delgadomangas@gmail.com>
 ENV USER root
 ENV HOME /root
-ENV RUST_VERSION 1.31.1
-ENV RUST_SRC_PATH /usr/local/src/rustc-${RUST_VERSION}-src/src
+ENV RUST_VERSION 1.48.0
+ENV RUST_SRC_PATH /usr/local/src/rustc-${RUST_VERSION}-src/library
 
 RUN apt-get update
 RUN apt-get install software-properties-common -y
-RUN add-apt-repository ppa:kelleyk/emacs
 RUN apt-get update
 RUN apt-get install -y curl \
+                       cmake \
                        file \
                        git \
-                       emacs25 \
+                       emacs \
                        gcc \
                        g++
 
@@ -32,7 +32,7 @@ RUN bash -c "if [[ ! -d $RUST_SRC_PATH ]]; then \
              fi"
 WORKDIR ${HOME}
 
-# Install Racer for Rust autocompletion
+# Install Racer and Rust Language Server for Rust autocompletion
 ENV CARGO_PATH=$HOME/.cargo/bin/
 # Racer requires rust nightly
 RUN $CARGO_PATH/rustup override set nightly
@@ -50,3 +50,6 @@ COPY gitconfig ${HOME}/.gitconfig
 
 # Enable 256 ANSI colors for Emacs
 ENV TERM xterm-256color
+
+# Rust language server
+RUN $CARGO_PATH/rustup component add rls

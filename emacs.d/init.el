@@ -75,5 +75,8 @@
 ;; Install magic
 (package-install 'magit)
 
+;; Eglot language server client
+(package-install 'eglot)
+
 ;; Load a sane color theme
 (load-theme 'wombat)
